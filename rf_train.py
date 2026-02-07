@@ -11,37 +11,24 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 
-# =====================
-# Load Dataset
-# =====================
+
 df = pd.read_csv("Social_Network_Ads.csv")
 
 print(df.head())
 
-
-# =====================
-# Target and Features
-# =====================
 X = df.drop("Purchased", axis=1)
 y = df["Purchased"]
 
 
-# =====================
-# Feature Engineering
-# =====================
 X["Age_Salary_Ratio"] = X["EstimatedSalary"] / (X["Age"] + 1)
 
 
-# =====================
-# Column Split
-# =====================
 numeric_features = X.select_dtypes(include=['int64', 'float64']).columns
 categorical_features = X.select_dtypes(include=['object']).columns
 
 
-# =====================
 # Preprocessing
-# =====================
+
 num_transformer = Pipeline(steps=[
     ("imputer", SimpleImputer(strategy="median")),
     ("scaler", StandardScaler())
@@ -58,9 +45,8 @@ preprocessor = ColumnTransformer(transformers=[
 ])
 
 
-# =====================
 # Random Forest Model
-# =====================
+
 rf_model = RandomForestClassifier(
     n_estimators=200,
     max_depth=10,
@@ -68,20 +54,16 @@ rf_model = RandomForestClassifier(
     random_state=42,
     n_jobs=-1
 )
+# Pipeline
 
-
-# =====================
-# Full Pipeline
-# =====================
 rf_pipeline = Pipeline(steps=[
     ("preprocessor", preprocessor),
     ("model", rf_model)
 ])
 
 
-# =====================
 # Train-Test Split
-# =====================
+
 X_train, X_test, y_train, y_test = train_test_split(
     X, y,
     test_size=0.2,
@@ -89,16 +71,11 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
-
-# =====================
 # Train Model
-# =====================
+
 rf_pipeline.fit(X_train, y_train)
 
 
-# =====================
-# Evaluation
-# =====================
 y_pred = rf_pipeline.predict(X_test)
 
 accuracy = accuracy_score(y_test, y_pred)
@@ -111,10 +88,8 @@ print(confusion_matrix(y_test, y_pred))
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
 
-
-# =====================
 # Save Model
-# =====================
+
 with open("Social_Network_RF_Pipeline.pkl", "wb") as f:
     pickle.dump(rf_pipeline, f)
 
